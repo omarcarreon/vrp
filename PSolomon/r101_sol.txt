@@ -1,0 +1,45 @@
+R101
+
+19
+92-42-15-87-57-97-0
+27-69-76-79-3-54-24-80-0
+95-98-16-86-91-100-0
+36-47-19-8-46-17-0
+14-44-38-43-13-0
+39-23-67-55-25-0
+31-88-7-10-0
+62-11-90-20-32-70-0
+2-21-73-41-56-4-0
+5-83-61-85-37-93-0
+52-6-0
+65-71-81-50-68-0
+59-99-94-96-0
+72-75-22-74-58-0
+33-29-78-34-35-77-0
+30-51-9-66-1-0
+45-82-18-84-60-89-0
+28-12-40-53-26-0
+63-64-49-48-0
+Problem Set: R101
+Vehicle capacity: 200.00
+Routes: 19
+Total travel distance: 1650.79864000
+Route: 1, len: 6, dist:       86.77278000, max cap:   60.00
+Route: 2, len: 8, dist:       95.32472000, max cap:   98.00
+Route: 3, len: 6, dist:       75.20345000, max cap:  102.00
+Route: 4, len: 6, dist:      132.48994000, max cap:   61.00
+Route: 5, len: 5, dist:      100.86701000, max cap:   84.00
+Route: 6, len: 5, dist:      110.15853000, max cap:   93.00
+Route: 7, len: 4, dist:       68.42601000, max cap:   57.00
+Route: 8, len: 6, dist:      103.89808000, max cap:   71.00
+Route: 9, len: 6, dist:       87.12985000, max cap:   57.00
+Route: 10, len: 6, dist:       74.50436000, max cap:  121.00
+Route: 11, len: 2, dist:       35.64697000, max cap:   12.00
+Route: 12, len: 5, dist:      118.41699000, max cap:  110.00
+Route: 13, len: 4, dist:       45.38764000, max cap:   75.00
+Route: 14, len: 5, dist:       60.59932000, max cap:   87.00
+Route: 15, len: 6, dist:      109.12702000, max cap:   59.00
+Route: 16, len: 5, dist:       95.88676000, max cap:   82.00
+Route: 17, len: 6, dist:       87.97649000, max cap:   69.00
+Route: 18, len: 5, dist:       55.63700000, max cap:   75.00
+Route: 19, len: 4, dist:      107.34572000, max cap:   85.00
