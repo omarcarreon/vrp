@@ -3,7 +3,7 @@
 %% Entrada de datos
 
 %dirIni = pwd;
-
+warning('off', 'Octave:possible-matlab-short-circuit-operator');
 dir = '/Users/omarcarreon/Downloads/Proyecto/PSolomon';
 fname = 'r102';                % archivo de datos
 
@@ -134,43 +134,83 @@ for i=1:length(x)
 end
 hold off
 
-%% Funcion para revisar capacidad
-%function [capRow1,capRow2] = calculaCapacidad(i,iRand,uRetTemp,d)
-%    capRow1 = 0;
-%    capRow2 = 0;
-%    for j=1:length(uRetTemp)
-%      capRow1 = capRow1 + d(uRetTemp{i}(j));
-%      capRow2 = capRow2 + d(uRetTemp{iRand}(j));
-%    end
-%end
+% Funcion para actualizar matriz de rutas
+function uNueva = actualizaU(uFunc,d)
+  rows=1;
+  acumCapacidad = 0;
+  utemp = [];
+  uNueva = {};
+  for i=1:length(uFunc)
+    acumCapacidad = 0;
+    for j=2:length(uFunc{i})-1
+      acumCapacidad = acumCapacidad + d(j);
+       
+      if acumCapacidad > 200 
+        acumCapacidad = 0;
+        uNueva{rows} = utemp;
+        rows = rows + 1;
+        utemp = [];
+      end
+     
+      utemp = [utemp uFunc{i}(j)];
+    end
+  end
+
+  for i=1:length(uNueva)
+    uNueva{i} = [1 uNueva{i} 1];
+  end
+end
+
+
+% Funcion para revisar capacidad
+function [capRow1,capRow2] = calculaCapacidad(i,iRand,uRetTemp,d)
+    capRow1 = 0;
+    capRow2 = 0;
+    for j=1:length(uRetTemp{i})
+      capRow1 = capRow1 + d(uRetTemp{i}(j));
+    end
+    for k=1:length(uRetTemp{iRand})
+      capRow2 = capRow2 + d(uRetTemp{iRand}(k));
+    end
+end
 
 %% Funcion de vecindad
-function uReturn = vecindad(u)
+function uReturn = vecindad(u,d)
   uReturn = u;
   for i=1:length(u)
-    
-    funcrand = int32(rand * 1) + 1;
+    %funcrand = round(rand(1)*1);
+    funcrand = int32(rand * 1);
+    %indexRowSwap = round(rand(1) * (length(uReturn)-1)) + 1;
     indexRowSwap = int32(rand * (length(uReturn)-1)) + 1;
-      
+    [capRow1,capRow2] = calculaCapacidad(i,indexRowSwap,uReturn,d);
+    %disp(capRow1);
+    %disp(capRow2);
     if ~isempty(uReturn{i}) & ~isempty(uReturn{indexRowSwap})
-      if funcrand == 1 %Exchange operator 
+      if funcrand == 0 %Exchange operator 
+%        index1Swap = round(rand(1) * (length(uReturn{i})-3)) + 2;
+%        index2Swap = round(rand(1) * (length(uReturn{indexRowSwap})-3)) + 2;
         index1Swap = int32(rand * (length(uReturn{i})-3)) + 2;
         index2Swap = int32(rand * (length(uReturn{indexRowSwap})-3)) + 2;
         
-        temp = uReturn{i}(index1Swap);
-        uReturn{i}(index1Swap) = uReturn{indexRowSwap}(index2Swap);
-        uReturn{indexRowSwap}(index2Swap) = temp;
+        if ((capRow1 - d(uReturn{i}(index1Swap)) + d(uReturn{indexRowSwap}(index2Swap)) < 200) & (capRow2 + d(uReturn{i}(index1Swap)) - d(uReturn{indexRowSwap}(index2Swap)) < 200))
+          temp = uReturn{i}(index1Swap);
+          uReturn{i}(index1Swap) = uReturn{indexRowSwap}(index2Swap);
+          uReturn{indexRowSwap}(index2Swap) = temp;
+        end
         
-      elseif funcrand == 2 % relocate operator
+      elseif funcrand == 1 % relocate operator
+        %index1Swap = round(rand(1) * (length(uReturn{i})-3)) + 2;
+        %index2Swap = round(rand(1) * (length(uReturn{indexRowSwap})-3)) + 2;
         index1Swap = int32(rand * (length(uReturn{i})-3)) + 2;
         index2Swap = int32(rand * (length(uReturn{indexRowSwap})-3)) + 2;
         
         temp = uReturn{i}(index1Swap);
         rest = uReturn{indexRowSwap}(index2Swap:end);
         
-        uReturn{i}(index1Swap) = [];
-        uReturn{indexRowSwap} = [uReturn{indexRowSwap}(1:index2Swap-1) temp rest];
-        
+        if ((capRow1 - temp < 200) & (capRow2 + temp < 200))
+          uReturn{i}(index1Swap) = [];
+          uReturn{indexRowSwap} = [uReturn{indexRowSwap}(1:index2Swap-1) temp rest];
+        end
       elseif funcrand == 3 % cross exchange
         index1Swap = int32(rand * (length(uReturn{i})-3)) + 2;
         index2Swap = int32(rand * (length(uReturn{i})-3)) + 2;
@@ -202,19 +242,35 @@ end
 
 % Gráfica y evaluación de una solución u
 
-[costo,~,~,~] = costoVRP(u);
+[costo,~,capEv1,~] = costoVRP(u);
 intentos = 0;
-while(intentos ~= 10000)
+evaluar=true;
+while(intentos ~= 100)
     uTemp = u;
     costoTemp = costo;
-    u = vecindad(u);
-    [costo,~,~,~] = costoVRP(u);
+    u = vecindad(u,d);
+    [costo,~,capEv2,~] = costoVRP(u);
+    
+    % Revisa que las rutas no excedan la capacidad maxima
+    for i=1:length(capEv2)
+      if capEv2(i) < 200
+        evaluar = false;
+      end
+    end
+    disp(uTemp);
+    if evaluar == false
+      uTemp = actualizaU(uTemp,d);
+    end
+    disp(uTemp);
 
     %SI costo del vecino es menor que el actual se acepta.
-    if costo > costoTemp
-      u = uTemp;
-      costo = costoTemp;
+    if evaluar == true 
+      if costo > costoTemp
+        u = uTemp;
+        costo = costoTemp;
+      end
     end
+    
     intentos = intentos + 1;
 end
 
